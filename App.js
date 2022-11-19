@@ -6,7 +6,7 @@ import IndexScreen from './src/screens/IndexScreen';
 import ShowScreen from './src/screens/ShowScreen';
 import CreateScreen from './src/screens/CreateScreen';
 import EditScreen from './src/screens/EditScreen';
-import { Provider } from './src/context/BlogContext';
+import { Provider as BlogProvider } from './src/context/BlogContext';
 import { TouchableOpacity } from 'react-native';
 import { EvilIcons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -31,7 +31,7 @@ const App = () => {
   }
 
   return (
-    <Provider>
+    <BlogProvider>
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName="Index"
@@ -93,7 +93,7 @@ const App = () => {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </Provider >
+    </BlogProvider >
   )
 }
 

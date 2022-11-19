@@ -1,7 +1,10 @@
 import createDataContext from './createDataContext';
+import jsonServer from '../api/jsonServer'
 
 const blogReducer = (state, action) => {
     switch (action.type) {
+        case 'get_blogposts':
+            return action.payload;
         case 'edit_blogpost':
             return state.map((blogPost) => {
                 return blogPost.id === action.payload.id ? action.payload : blogPost;
@@ -12,7 +15,7 @@ const blogReducer = (state, action) => {
             return [
                 ...state,
                 {
-                    id: Math.floor(Math.random() * 99999),
+                    id: action.payload.id,
                     title: action.payload.title,
                     content: action.payload.content,
                 },
@@ -22,36 +25,59 @@ const blogReducer = (state, action) => {
     }
 };
 
-const addBlogPost = (dispatch) => {
-    //! the arguments(title,content, callback) for dispatch() put into the return function
-    //! callback function here is after successfully add a blog post(submit the form), navigate to home page
-    return (title, content, callback) => {
-        dispatch({ type: 'add_blogpost', payload: { title, content } });
-        if (callback) {
-            callback();
-        }
-    };
-};
-const deleteBlogPost = (dispatch) => {
-    //! the argument(id) for dispatch() put into the return function
-    return (id) => {
-        dispatch({ type: 'delete_blogpost', payload: id });
-    };
-};
-const editBlogPost = (dispatch) => {
-    return (id, title, content, callback) => {
-        dispatch({
-            type: 'edit_blogpost',
-            payload: { id, title, content },
-        });
-        if (callback) {
-            callback();
-        }
+const getBlogPosts = dispatch => {
+    return async () => {
+        const response = await jsonServer.get('/blogposts');
+
+        dispatch({ type: 'get_blogposts', payload: response.data });
     };
 };
 
+const addBlogPost = (dispatch) => {
+    //! the arguments(title,content, callback) for dispatch() put into the return function
+    //! callback function here is after successfully add a blog post(submit the form), navigate to home page
+    return async (title, content, callback) => {
+        // dispatch({ type: 'add_blogpost', payload: { title, content } });
+
+        const response = await jsonServer.post('/blogposts', { title, content })
+
+        dispatch({
+            type: 'add_blogpost',
+            payload: response.data
+        })
+
+        if (callback) {
+            callback();
+        }
+    };
+}
+
+const deleteBlogPost = (dispatch) => {
+    //! the argument(id) for dispatch() put into the return function
+    return async id => {
+        await jsonServer.delete(`/blogposts/${id}`);
+
+        dispatch({ type: 'delete_blogpost', payload: id });
+    }
+}
+
+const editBlogPost = (dispatch) => {
+    return async (id, title, content, callback) => {
+        await jsonServer.put(`/blogposts/${id}`, { title, content });
+
+        dispatch({
+            type: 'edit_blogpost',
+            payload: { id, title, content }
+        })
+
+        if (callback) {
+            callback();
+        }
+    };
+}
+
 export const { Context, Provider } = createDataContext(
     blogReducer,
-    { addBlogPost, deleteBlogPost, editBlogPost },
-    [{ title: 'TEST POST', content: 'TEST CONTENT', id: 1 }]
+    { addBlogPost, deleteBlogPost, editBlogPost, getBlogPosts },
+    []
 );

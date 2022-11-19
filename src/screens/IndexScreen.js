@@ -8,7 +8,7 @@ import { Feather } from '@expo/vector-icons';
 const IndexScreen = ({ navigation, route }) => {
   const [count, setCount] = useState(0);
 
-  const { state, deleteBlogPost } = useContext(Context);
+  const { state, deleteBlogPost, getBlogPosts } = useContext(Context);
 
   //! Header interaction with its screen component
   //! https://reactnavigation.org/docs/header-buttons/
@@ -21,11 +21,32 @@ const IndexScreen = ({ navigation, route }) => {
   //   })
   // }, [navigation, count])
 
+  useEffect(() => {
+    getBlogPosts()
+ 
+    //! Call a function when focused screen changes
+    //! https://reactnavigation.org/docs/function-after-focusing-screen/
+    // tells React navigation that anytime this component IndexScreen gains focus 
+    // or is like the primary screen on the device,
+    // then this callback function right here will be invoked.
+    // So inside of there we can add in another call to getBlogPosts.
+    const unsuscribe = navigation.addListener('focus', () => {
+      // The screen is focused
+      // Call any action
+      getBlogPosts()
+    })
+ 
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsuscribe
+
+  }, [navigation]) //! remember to put [navigation]
+
+
   return (
     <View>
       <FlatList
         data={state}
-        keyExtractor={(blogPost) => blogPost.title}
+        keyExtractor={(blogPost) => blogPost.id}
 
         //! remember to destructure item: {item}
         renderItem={({ item }) => (
